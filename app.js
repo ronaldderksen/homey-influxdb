@@ -38,7 +38,10 @@ module.exports = class InfluxDbApp extends Homey.App {
             this._influxDb.on('online', this._onOnline.bind(this));
             await this.initSettings();
             await this.initFlows();
-            this._devices = new DeviceHandler({ homey: this.homey, api: this._api, log: this.log });
+            this._devices = new DeviceHandler({
+                homey: this.homey, api: this._api, log: this.log,
+                repeatInterval: this.homey.settings.get('capability_repeat_interval')
+            });
             this._devices.on('capability', this._onCapability.bind(this));
             await this._devices.registerDevices();
             await this.enableDisableMetrics();
@@ -108,6 +111,9 @@ module.exports = class InfluxDbApp extends Homey.App {
             measurementMode: measurementMode,
             measurementPrefix: measurementPrefix
         };
+        if (this.homey.settings.get('capability_repeat_interval') == null) {
+            this.homey.settings.set('capability_repeat_interval', 0);
+        }
         this.homey.settings.on('set', this._onSettingsChanged.bind(this));
         await this._influxDb.updateSettings({
             host: this.homey.settings.get('host'),
@@ -144,6 +150,9 @@ module.exports = class InfluxDbApp extends Homey.App {
             this.homey.settings.set('database', settings.database);
             this.homey.settings.set('measurement_mode', settings.measurement_mode);
             this.homey.settings.set('measurement_prefix', settings.measurement_prefix);
+            const repeatInterval = settings.capability_repeat_interval ?? 0;
+            this.homey.settings.set('capability_repeat_interval', repeatInterval);
+            if (this._devices) this._devices.updateRepeatInterval(repeatInterval);
             await this._influxDb.updateSettings(settings);
             this._measurementOptions = {
                 measurementMode: settings.measurement_mode,
@@ -155,6 +164,9 @@ module.exports = class InfluxDbApp extends Homey.App {
     _validateSettings(settings) {
         if (!settings) {
             return 'Settings object is missing';
+        }
+        if (!DeviceHandler.isValidRepeatInterval(settings.capability_repeat_interval ?? 0)) {
+            return 'Capability repeat interval must be 0 (disabled) or at least 10 whole seconds';
         }
 
         // Validate host

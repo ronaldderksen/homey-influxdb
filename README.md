@@ -8,6 +8,8 @@ The IP address, port number and database for the InfluxDb must be entered in app
 
 For InfluxDB 2.x, the organization ID and token must be set.  For InfluxDB 1.x they must not be set.
 
+App settings also let you repeat the last known device capability values after an interval without updates. The interval is in whole seconds: 0 disables repetition (default); enabled intervals must be at least 10 seconds. Changes apply immediately, without restarting the app.
+
 ## Release Notes:
 
 #### 1.3.1

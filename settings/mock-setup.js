@@ -20,6 +20,7 @@ void function () {
         database: 'homey',
         measurement_mode: 'by_name',
         measurement_prefix: '',
+        capability_repeat_interval: 0,
     });
 
     Homey.addRoutes([

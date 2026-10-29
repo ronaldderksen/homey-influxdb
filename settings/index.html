@@ -102,6 +102,11 @@
                 prefix:</label>
             <input class="homey-form-input" id="measurement_prefix" type="text" maxlength="20">
         </div>
+        <div class="homey-form-group">
+            <label class="homey-form-label" for="capability_repeat_interval" data-i18n="pair.capability_repeat_interval_label">Repeat capability values after (seconds):</label>
+            <input class="homey-form-input" id="capability_repeat_interval" type="number" min="0" step="1" value="0" aria-describedby="capability_repeat_interval_hint">
+            <p id="capability_repeat_interval_hint" data-i18n="pair.capability_repeat_interval_hint">0 disables repetition (default). Otherwise, enter at least 10 seconds. Values are repeated only when no updates arrive.</p>
+        </div>
     </fieldset>
 
     <button class="homey-button-primary-full"
@@ -127,6 +132,7 @@
     let passwordElement = document.getElementById('password');
     let databaseElement = document.getElementById('database');
     let measurementPrefixElement = document.getElementById('measurement_prefix');
+    const repeatIntervalElement = document.getElementById('capability_repeat_interval');
 
     const protocolElement = document.getElementById('protocol');
     const measurementModeElement = document.getElementById('measurement_mode');
@@ -153,6 +159,10 @@
 
     document.getElementById('save').addEventListener('click', async function (e) {
       // Validate inputs before saving
+      const repeatInterval = Number(repeatIntervalElement.value);
+      if (!Number.isSafeInteger(repeatInterval) || (repeatInterval !== 0 && repeatInterval < 10)) {
+        return Homey.alert('Capability repeat interval must be 0 (disabled) or at least 10 whole seconds');
+      }
       const host = hostElement.value.trim();
       if (!host) {
         return Homey.alert('Host cannot be empty');
@@ -197,7 +207,8 @@
         password: passwordElement.value,
         database: database,
         measurement_mode: measurementModeElement.value,
-        measurement_prefix: measurementPrefixElement.value
+        measurement_prefix: measurementPrefixElement.value,
+        capability_repeat_interval: repeatInterval
       }, function (err) {
         if (err) return Homey.alert(err);
       });
@@ -263,6 +274,7 @@
       databaseElement.value = await getSetting('database');
       measurementModeElement.value = await getSetting('measurement_mode');
       measurementPrefixElement.value = await getSetting('measurement_prefix');
+      repeatIntervalElement.value = (await getSetting('capability_repeat_interval')) ?? 0;
       await fetchStatus(() => {
         Homey.ready();
       });

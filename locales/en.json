@@ -17,6 +17,8 @@
     "database_label": "Database/bucket:",
     "measurement_mode_label": "Measurement mode:",
     "measurement_prefix_label": "Measurement prefix:",
+    "capability_repeat_interval_label": "Repeat capability values after (seconds):",
+    "capability_repeat_interval_hint": "0 disables repetition (default). Otherwise, enter at least 10 seconds. Values are repeated only when no updates arrive.",
     "change_settings_btn": "Change settings",
     "save_btn": "Save settings",
     "cancel_btn": "Cancel",
